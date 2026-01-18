@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Pencil, Trash2, BookOpen, FileText, TrendingUp, AlertCircle, Users, Shield, User, Keyboard, Search, Loader2 } from "lucide-react"
+import { Plus, Pencil, Trash2, BookOpen, FileText, TrendingUp, AlertCircle, Users, Shield, User, Keyboard, Search, Loader2, Camera } from "lucide-react"
+import { ISBNScanner } from "@/components/user/isbn-scanner"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -74,6 +75,7 @@ export default function AdminDashboard() {
   const [addMethodDialogOpen, setAddMethodDialogOpen] = useState(false)
   const [manualInputMode, setManualInputMode] = useState(false)
   const [isbnSearchMode, setIsbnSearchMode] = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
   const [isbnInput, setIsbnInput] = useState("")
   const [isbnSearchLoading, setIsbnSearchLoading] = useState(false)
   const [isbnSearchError, setIsbnSearchError] = useState("")
@@ -169,6 +171,19 @@ export default function AdminDashboard() {
     setSearchedBookData(null)
     setEditableBookData(null)
     setIsbnSearchError("")
+  }
+
+  const handleCameraScanMode = () => {
+    setAddMethodDialogOpen(false)
+    setScannerOpen(true)
+  }
+
+  const handleScannerScan = async (scannedIsbn: string) => {
+    setScannerOpen(false)
+    setIsbnInput(scannedIsbn)
+    setIsbnSearchMode(true)
+    // Automatically search after scan
+    await handleSearchByIsbn(scannedIsbn)
   }
 
   const handleSearchByIsbn = async (isbn: string) => {
@@ -625,6 +640,7 @@ export default function AdminDashboard() {
           setAddMethodDialogOpen(false)
           setManualInputMode(false)
           setIsbnSearchMode(false)
+          setScannerOpen(false)
           setSearchedBookData(null)
           setEditableBookData(null)
           setIsbnInput("")
@@ -646,6 +662,23 @@ export default function AdminDashboard() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <Button
+              onClick={handleCameraScanMode}
+              className="h-auto p-6 flex flex-col items-start gap-3"
+              variant="outline"
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Camera className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold">Scan dengan Kamera</div>
+                  <div className="text-sm text-muted-foreground font-normal">
+                    Scan barcode ISBN menggunakan kamera perangkat
+                  </div>
+                </div>
+              </div>
+            </Button>
             <Button
               onClick={handleIsbnSearchMode}
               className="h-auto p-6 flex flex-col items-start gap-3"
@@ -1038,6 +1071,16 @@ export default function AdminDashboard() {
         onOpenChange={setFormOpen}
         book={selectedBook}
         onSuccess={fetchBooks}
+      />
+
+      {/* ISBN Scanner Dialog */}
+      <ISBNScanner
+        open={scannerOpen}
+        onScan={handleScannerScan}
+        onClose={() => {
+          setScannerOpen(false)
+          setAddMethodDialogOpen(true)
+        }}
       />
     </div>
   )

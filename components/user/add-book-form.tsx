@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, Keyboard, Search } from "lucide-react"
+import { Loader2, Keyboard, Search, Camera } from "lucide-react"
+import { ISBNScanner } from "@/components/user/isbn-scanner"
 
 interface BookData {
   title: string
@@ -49,6 +50,7 @@ export function AddBookForm({
   const [methodDialogOpen, setMethodDialogOpen] = useState(false)
   const [manualInputMode, setManualInputMode] = useState(false)
   const [isbnSearchMode, setIsbnSearchMode] = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
   const [isbnInput, setIsbnInput] = useState("")
   const [bookData, setBookData] = useState<BookData | null>(null)
   const [editableBookData, setEditableBookData] = useState<BookData | null>(null)
@@ -72,6 +74,7 @@ export function AddBookForm({
       setMethodDialogOpen(false)
       setManualInputMode(false)
       setIsbnSearchMode(false)
+      setScannerOpen(false)
       setIsbnInput("")
       setBookData(null)
       setEditableBookData(null)
@@ -125,6 +128,19 @@ export function AddBookForm({
   const handleIsbnSearchMode = () => {
     setMethodDialogOpen(false)
     setIsbnSearchMode(true)
+  }
+
+  const handleCameraScanMode = () => {
+    setMethodDialogOpen(false)
+    setScannerOpen(true)
+  }
+
+  const handleScannerScan = async (scannedIsbn: string) => {
+    setScannerOpen(false)
+    setIsbnInput(scannedIsbn)
+    setIsbnSearchMode(true)
+    // Automatically search after scan
+    await handleIsbnSearch(scannedIsbn)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -342,26 +358,45 @@ export function AddBookForm({
           onOpenChange(false)
         }
       }}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Buku ke Koleksi</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] max-w-[500px] mx-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-2 sm:space-y-3 pb-3 sm:pb-4">
+            <DialogTitle className="text-lg sm:text-xl font-semibold leading-tight">
+              Tambah Buku ke Koleksi
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
               Pilih metode untuk menambahkan buku
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 py-2 sm:py-4">
             <Button
-              onClick={handleIsbnSearchMode}
-              className="h-auto p-6 flex flex-col items-start gap-3"
+              onClick={handleCameraScanMode}
+              className="h-auto p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full hover:shadow-md transition-shadow duration-200 border-2 hover:border-primary/20"
               variant="outline"
             >
               <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Search className="h-6 w-6 text-primary" />
+                <div className="p-2 sm:p-2.5 bg-primary/10 rounded-lg shrink-0 shadow-sm">
+                  <Camera className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold">Cari dengan ISBN</div>
-                  <div className="text-sm text-muted-foreground font-normal">
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-semibold text-sm sm:text-base mb-1">Scan dengan Kamera</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal leading-relaxed">
+                    Scan barcode ISBN menggunakan kamera perangkat
+                  </div>
+                </div>
+              </div>
+            </Button>
+            <Button
+              onClick={handleIsbnSearchMode}
+              className="h-auto p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full hover:shadow-md transition-shadow duration-200 border-2 hover:border-primary/20"
+              variant="outline"
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="p-2 sm:p-2.5 bg-primary/10 rounded-lg shrink-0 shadow-sm">
+                  <Search className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-semibold text-sm sm:text-base mb-1">Cari dengan ISBN</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal leading-relaxed">
                     Masukkan ISBN untuk mencari informasi buku secara otomatis
                   </div>
                 </div>
@@ -369,29 +404,30 @@ export function AddBookForm({
             </Button>
             <Button
               onClick={handleManualInput}
-              className="h-auto p-6 flex flex-col items-start gap-3"
+              className="h-auto p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full hover:shadow-md transition-shadow duration-200 border-2 hover:border-primary/20"
               variant="outline"
             >
               <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Keyboard className="h-6 w-6 text-primary" />
+                <div className="p-2 sm:p-2.5 bg-primary/10 rounded-lg shrink-0 shadow-sm">
+                  <Keyboard className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold">Input Manual</div>
-                  <div className="text-sm text-muted-foreground font-normal">
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-semibold text-sm sm:text-base mb-1">Input Manual</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-normal leading-relaxed">
                     Masukkan informasi buku secara manual
                   </div>
                 </div>
               </div>
             </Button>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2 sm:pt-4 border-t border-border/50">
             <Button
               variant="ghost"
               onClick={() => {
                 setMethodDialogOpen(false)
                 onOpenChange(false)
               }}
+              className="text-sm sm:text-base px-4 sm:px-6"
             >
               Batal
             </Button>
@@ -400,10 +436,12 @@ export function AddBookForm({
       </Dialog>
 
       <Dialog open={open && !methodDialogOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Buku ke Koleksi</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] max-w-[600px] mx-auto p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="space-y-2 sm:space-y-3 pb-3 sm:pb-4">
+            <DialogTitle className="text-lg sm:text-xl font-semibold leading-tight">
+              Tambah Buku ke Koleksi
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
               {manualInputMode 
                 ? "Masukkan informasi buku secara manual"
                 : isbnSearchMode
@@ -418,9 +456,11 @@ export function AddBookForm({
             <form onSubmit={(e) => {
               e.preventDefault()
               handleIsbnSearch(isbnInput)
-            }} className="space-y-4">
-              <div>
-                <Label htmlFor="isbn-search">ISBN</Label>
+            }} className="space-y-4 sm:space-y-5 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="isbn-search" className="text-sm sm:text-base font-medium">
+                  ISBN
+                </Label>
                 <Input
                   id="isbn-search"
                   type="text"
@@ -430,12 +470,13 @@ export function AddBookForm({
                   disabled={loading}
                   required
                   autoFocus
+                  className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
                   Sistem akan mencari informasi buku dari Open Library dan Google Books
                 </p>
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 pt-4 sm:pt-6 border-t border-border/50">
                 <Button
                   type="button"
                   variant="outline"
@@ -445,10 +486,15 @@ export function AddBookForm({
                     setIsbnInput("")
                   }}
                   disabled={loading}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6"
                 >
                   Kembali
                 </Button>
-                <Button type="submit" disabled={loading || !isbnInput.trim()}>
+                <Button 
+                  type="submit" 
+                  disabled={loading || !isbnInput.trim()}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 shadow-sm hover:shadow-md transition-shadow"
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -464,10 +510,10 @@ export function AddBookForm({
               </DialogFooter>
             </form>
           ) : manualInputMode ? (
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="manual-title">
+            <form onSubmit={handleSubmit} className="pt-2">
+              <div className="space-y-4 sm:space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="manual-title" className="text-sm sm:text-base font-medium">
                     Judul Buku <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -478,10 +524,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan judul buku"
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="manual-author">
+                <div className="space-y-2">
+                  <Label htmlFor="manual-author" className="text-sm sm:text-base font-medium">
                     Penulis <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -492,10 +539,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan nama penulis"
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="manual-isbn">ISBN</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="manual-isbn" className="text-sm sm:text-base font-medium">ISBN</Label>
                   <Input
                     id="manual-isbn"
                     value={manualFormData.isbn}
@@ -503,10 +551,11 @@ export function AddBookForm({
                       setManualFormData({ ...manualFormData, isbn: e.target.value })
                     }
                     placeholder="Masukkan ISBN (opsional)"
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="manual-description">Deskripsi</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="manual-description" className="text-sm sm:text-base font-medium">Deskripsi</Label>
                   <Textarea
                     id="manual-description"
                     value={manualFormData.description}
@@ -515,10 +564,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan deskripsi buku (opsional)"
                     rows={3}
+                    className="text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-3 resize-none"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="manual-coverImage">URL Cover Buku</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="manual-coverImage" className="text-sm sm:text-base font-medium">URL Cover Buku</Label>
                   <Input
                     id="manual-coverImage"
                     type="url"
@@ -527,24 +577,25 @@ export function AddBookForm({
                       setManualFormData({ ...manualFormData, coverImage: e.target.value })
                     }
                     placeholder="https://example.com/cover.jpg (opsional)"
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
                 {manualFormData.coverImage && (
-                  <div className="flex justify-center">
+                  <div className="flex justify-center py-2">
                     <img
                       src={manualFormData.coverImage}
                       alt="Preview"
-                      className="h-32 object-cover rounded"
+                      className="h-32 sm:h-40 w-auto max-w-full object-cover rounded-lg shadow-md"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none'
                       }}
                     />
                   </div>
                 )}
-                <div>
-                  <Label htmlFor="condition">Kondisi Buku</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="condition" className="text-sm sm:text-base font-medium">Kondisi Buku</Label>
                   <Select value={condition} onValueChange={setCondition}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -554,31 +605,35 @@ export function AddBookForm({
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="location">Lokasi/Kota <span className="text-destructive">*</span></Label>
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-sm sm:text-base font-medium">
+                    Lokasi/Kota <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Contoh: Jakarta, Bandung, Surabaya..."
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
                     Lokasi membantu peminjam menemukan buku terdekat
                   </p>
                 </div>
-                <div>
-                  <Label htmlFor="notes">Catatan (Opsional)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="notes" className="text-sm sm:text-base font-medium">Catatan (Opsional)</Label>
                   <Textarea
                     id="notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Catatan tentang buku ini..."
                     rows={3}
+                    className="text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-3 resize-none"
                   />
                 </div>
               </div>
-              <DialogFooter className="mt-4">
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/50">
                 <Button
                   type="button"
                   variant="outline"
@@ -597,10 +652,15 @@ export function AddBookForm({
                     setLocation("")
                   }}
                   disabled={loading}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6"
                 >
                   Kembali
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 shadow-sm hover:shadow-md transition-shadow"
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -613,22 +673,22 @@ export function AddBookForm({
               </DialogFooter>
             </form>
           ) : editableBookData ? (
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="pt-2">
+              <div className="space-y-4 sm:space-y-5">
                 {editableBookData.coverImage && (
-                  <div className="flex justify-center">
+                  <div className="flex justify-center py-2">
                     <img
                       src={editableBookData.coverImage}
                       alt={editableBookData.title}
-                      className="h-32 object-cover rounded"
+                      className="h-32 sm:h-40 w-auto max-w-full object-cover rounded-lg shadow-md"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none'
                       }}
                     />
                   </div>
                 )}
-                <div>
-                  <Label htmlFor="edit-title">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-title" className="text-sm sm:text-base font-medium">
                     Judul Buku <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -639,10 +699,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan judul buku"
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="edit-author">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-author" className="text-sm sm:text-base font-medium">
                     Penulis <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -653,10 +714,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan nama penulis"
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="edit-isbn">ISBN</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-isbn" className="text-sm sm:text-base font-medium">ISBN</Label>
                   <Input
                     id="edit-isbn"
                     value={editableBookData.isbn}
@@ -664,10 +726,11 @@ export function AddBookForm({
                       setEditableBookData({ ...editableBookData, isbn: e.target.value })
                     }
                     placeholder="Masukkan ISBN (opsional)"
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="edit-description">Deskripsi</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description" className="text-sm sm:text-base font-medium">Deskripsi</Label>
                   <Textarea
                     id="edit-description"
                     value={editableBookData.description || ""}
@@ -676,10 +739,11 @@ export function AddBookForm({
                     }
                     placeholder="Masukkan deskripsi buku (opsional)"
                     rows={3}
+                    className="text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-3 resize-none"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="edit-coverImage">URL Cover Buku</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-coverImage" className="text-sm sm:text-base font-medium">URL Cover Buku</Label>
                   <Input
                     id="edit-coverImage"
                     type="url"
@@ -688,13 +752,14 @@ export function AddBookForm({
                       setEditableBookData({ ...editableBookData, coverImage: e.target.value })
                     }
                     placeholder="https://example.com/cover.jpg (opsional)"
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
                   {editableBookData.coverImage && (
                     <div className="mt-2 flex justify-center">
                       <img
                         src={editableBookData.coverImage}
                         alt="Preview"
-                        className="h-24 object-cover rounded border"
+                        className="h-24 sm:h-32 w-auto max-w-full object-cover rounded-lg border shadow-sm"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none'
                         }}
@@ -702,10 +767,10 @@ export function AddBookForm({
                     </div>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="condition">Kondisi Buku</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="condition" className="text-sm sm:text-base font-medium">Kondisi Buku</Label>
                   <Select value={condition} onValueChange={setCondition}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -715,31 +780,35 @@ export function AddBookForm({
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="location">Lokasi/Kota <span className="text-destructive">*</span></Label>
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-sm sm:text-base font-medium">
+                    Lokasi/Kota <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="location"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Contoh: Jakarta, Bandung, Surabaya..."
                     required
+                    className="text-sm sm:text-base h-10 sm:h-11 px-3 sm:px-4"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
                     Lokasi membantu peminjam menemukan buku terdekat
                   </p>
                 </div>
-                <div>
-                  <Label htmlFor="notes">Catatan (Opsional)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="notes" className="text-sm sm:text-base font-medium">Catatan (Opsional)</Label>
                   <Textarea
                     id="notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Catatan tentang buku ini..."
                     rows={3}
+                    className="text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-3 resize-none"
                   />
                 </div>
               </div>
-              <DialogFooter className="mt-4">
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/50">
                 <Button
                   type="button"
                   variant="outline"
@@ -753,10 +822,15 @@ export function AddBookForm({
                     setLocation("")
                   }}
                   disabled={loading}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6"
                 >
                   Cari Lagi
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 shadow-sm hover:shadow-md transition-shadow"
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -771,6 +845,16 @@ export function AddBookForm({
           ) : null}
         </DialogContent>
       </Dialog>
+
+      {/* ISBN Scanner Dialog */}
+      <ISBNScanner
+        open={scannerOpen}
+        onScan={handleScannerScan}
+        onClose={() => {
+          setScannerOpen(false)
+          setMethodDialogOpen(true)
+        }}
+      />
     </>
   )
 }
