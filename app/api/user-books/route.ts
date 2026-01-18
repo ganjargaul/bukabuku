@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 // GET - List user books (if userId provided) or all available books (if no userId)
 export async function GET(request: NextRequest) {
   try {

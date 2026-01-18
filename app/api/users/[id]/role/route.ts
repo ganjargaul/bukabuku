@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 // PUT - Update user role (hanya untuk admin)
 export async function PUT(
   request: NextRequest,

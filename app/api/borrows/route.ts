@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 // GET - List semua borrow requests (untuk admin) atau borrows user tertentu
 export async function GET(request: NextRequest) {
   try {
