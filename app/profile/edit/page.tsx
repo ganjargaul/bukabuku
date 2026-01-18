@@ -117,7 +117,7 @@ export default function EditProfilePage() {
         : null
 
       // Handle profile image
-      let finalProfileImage = profileImage
+      let finalProfileImage: string | null = profileImage || null
       if (profileImageFile) {
         finalProfileImage = await convertImageToBase64(profileImageFile)
       } else if (!profileImagePreview && !profileImage) {

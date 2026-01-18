@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
+export const dynamic = 'force-dynamic'
+
 // GET - Search book by ISBN using Open Library API
 export async function GET(request: NextRequest) {
   try {

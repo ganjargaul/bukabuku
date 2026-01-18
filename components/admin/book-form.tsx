@@ -18,9 +18,9 @@ interface Book {
   id?: string
   title: string
   author: string
-  isbn?: string
-  description?: string
-  coverImage?: string
+  isbn?: string | null
+  description?: string | null
+  coverImage?: string | null
   stock?: number
   available?: number
 }
