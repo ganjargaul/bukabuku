@@ -23,6 +23,9 @@ interface Book {
   coverImage?: string | null
   stock?: number
   available?: number
+  createdAt?: string
+  updatedAt?: string
+  owners?: any[]
 }
 
 interface BookFormProps {
