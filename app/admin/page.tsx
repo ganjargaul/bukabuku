@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Pencil, Trash2, BookOpen, FileText, TrendingUp, AlertCircle, Users, Shield, User, Keyboard, Search, Loader2, Camera } from "lucide-react"
-import { ISBNScanner } from "@/components/user/isbn-scanner"
+import { Plus, Pencil, Trash2, BookOpen, FileText, TrendingUp, AlertCircle, Users, Shield, User } from "lucide-react"
+import { AddBookForm } from "@/components/user/add-book-form"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -16,17 +16,6 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { BookForm } from "@/components/admin/book-form"
 import Link from "next/link"
 
@@ -72,26 +61,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [usersLoading, setUsersLoading] = useState(true)
   const [formOpen, setFormOpen] = useState(false)
-  const [addMethodDialogOpen, setAddMethodDialogOpen] = useState(false)
-  const [manualInputMode, setManualInputMode] = useState(false)
-  const [isbnSearchMode, setIsbnSearchMode] = useState(false)
-  const [scannerOpen, setScannerOpen] = useState(false)
-  const [isbnInput, setIsbnInput] = useState("")
-  const [isbnSearchLoading, setIsbnSearchLoading] = useState(false)
-  const [isbnSearchError, setIsbnSearchError] = useState("")
-  const [searchedBookData, setSearchedBookData] = useState<any>(null)
-  const [editableBookData, setEditableBookData] = useState<any>(null)
-  const [manualFormData, setManualFormData] = useState({
-    title: "",
-    author: "",
-    isbn: "",
-    description: "",
-    coverImage: "",
-  })
+  const [addBookOpen, setAddBookOpen] = useState(false)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [activeTab, setActiveTab] = useState("books")
+  const [userId, setUserId] = useState<string | null>(null)
 
   const fetchBooks = async () => {
     try {
@@ -135,6 +110,8 @@ export default function AdminDashboard() {
         return
       }
       
+      setUserId(userId)
+      
       if (userRole !== "ADMIN") {
         // User is not admin, redirect to catalog
         setIsAuthorized(false)
@@ -151,132 +128,7 @@ export default function AdminDashboard() {
   }, [router])
 
   const handleCreate = () => {
-    setAddMethodDialogOpen(true)
-  }
-
-  const handleManualInput = () => {
-    setSelectedBook(null)
-    setAddMethodDialogOpen(false)
-    setManualInputMode(true)
-    setIsbnSearchMode(false)
-    setSearchedBookData(null)
-    setEditableBookData(null)
-  }
-
-  const handleIsbnSearchMode = () => {
-    setAddMethodDialogOpen(false)
-    setIsbnSearchMode(true)
-    setManualInputMode(false)
-    setIsbnInput("")
-    setSearchedBookData(null)
-    setEditableBookData(null)
-    setIsbnSearchError("")
-  }
-
-  const handleCameraScanMode = () => {
-    setAddMethodDialogOpen(false)
-    setScannerOpen(true)
-  }
-
-  const handleScannerScan = async (scannedIsbn: string) => {
-    setScannerOpen(false)
-    setIsbnInput(scannedIsbn)
-    setIsbnSearchMode(true)
-    // Automatically search after scan
-    await handleSearchByIsbn(scannedIsbn)
-  }
-
-  const handleSearchByIsbn = async (isbn: string) => {
-    if (!isbn || !isbn.trim()) {
-      setIsbnSearchError("ISBN tidak boleh kosong")
-      return
-    }
-
-    setIsbnSearchLoading(true)
-    setIsbnSearchError("")
-
-    try {
-      const response = await fetch(`/api/books/search?isbn=${encodeURIComponent(isbn.trim())}`)
-      
-      if (!response.ok) {
-        const error = await response.json()
-        setIsbnSearchError(error.error || "Buku tidak ditemukan")
-        setIsbnSearchLoading(false)
-        return
-      }
-
-      const data = await response.json()
-      setSearchedBookData(data)
-      setEditableBookData(data)
-      setIsbnSearchMode(false)
-      setIsbnSearchLoading(false)
-    } catch (error) {
-      console.error("Error searching book:", error)
-      setIsbnSearchError("Gagal mencari buku")
-      setIsbnSearchLoading(false)
-    }
-  }
-
-  const handleSubmitBook = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Use manual form data if in manual input mode, otherwise use editableBookData from search
-    const dataToUse = manualInputMode ? manualFormData : editableBookData
-
-    if (!dataToUse || !dataToUse.title?.trim() || !dataToUse.author?.trim()) {
-      alert("Judul dan penulis wajib diisi")
-      return
-    }
-
-    setIsbnSearchLoading(true)
-
-    try {
-      const response = await fetch("/api/books", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: dataToUse.title,
-          author: dataToUse.author,
-          isbn: dataToUse.isbn || null,
-          description: dataToUse.description || "",
-          coverImage: dataToUse.coverImage || "",
-        }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        alert(error.error || "Gagal menyimpan buku")
-        setIsbnSearchLoading(false)
-        return
-      }
-
-      // Reset states and close dialog
-      setManualInputMode(false)
-      setIsbnSearchMode(false)
-      setSearchedBookData(null)
-      setEditableBookData(null)
-      setIsbnInput("")
-      setManualFormData({
-        title: "",
-        author: "",
-        isbn: "",
-        description: "",
-        coverImage: "",
-      })
-      setIsbnSearchError("")
-      
-      fetchBooks()
-      setIsbnSearchLoading(false)
-      
-      // Show success message
-      alert("Buku berhasil ditambahkan")
-    } catch (error) {
-      console.error("Error saving book:", error)
-      alert("Terjadi kesalahan saat menyimpan buku")
-      setIsbnSearchLoading(false)
-    }
+    setAddBookOpen(true)
   }
 
   const handleEdit = (book: Book) => {
@@ -404,6 +256,18 @@ export default function AdminDashboard() {
               Tambah Buku
             </Button>
           )}
+          <Button asChild variant="outline">
+            <Link href="/admin/borrows">
+              <FileText className="mr-2 h-4 w-4" />
+              Peminjaman
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin/tracking">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Tracking
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -634,453 +498,21 @@ export default function AdminDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Dialog Pilihan Metode Tambah Buku */}
-      <Dialog open={addMethodDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-          setAddMethodDialogOpen(false)
-          setManualInputMode(false)
-          setIsbnSearchMode(false)
-          setScannerOpen(false)
-          setSearchedBookData(null)
-          setEditableBookData(null)
-          setIsbnInput("")
-          setIsbnSearchError("")
-          setManualFormData({
-            title: "",
-            author: "",
-            isbn: "",
-            description: "",
-            coverImage: "",
-          })
-        }
-      }}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Buku Baru</DialogTitle>
-            <DialogDescription>
-              Pilih metode untuk menambahkan buku baru
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Button
-              onClick={handleCameraScanMode}
-              className="h-auto p-6 flex flex-col items-start gap-3"
-              variant="outline"
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Camera className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold">Scan dengan Kamera</div>
-                  <div className="text-sm text-muted-foreground font-normal">
-                    Scan barcode ISBN menggunakan kamera perangkat
-                  </div>
-                </div>
-              </div>
-            </Button>
-            <Button
-              onClick={handleIsbnSearchMode}
-              className="h-auto p-6 flex flex-col items-start gap-3"
-              variant="outline"
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Search className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold">Cari dengan ISBN</div>
-                  <div className="text-sm text-muted-foreground font-normal">
-                    Masukkan ISBN untuk mencari informasi buku secara otomatis
-                  </div>
-                </div>
-              </div>
-            </Button>
-            <Button
-              onClick={handleManualInput}
-              className="h-auto p-6 flex flex-col items-start gap-3"
-              variant="outline"
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Keyboard className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="font-semibold">Input Manual</div>
-                  <div className="text-sm text-muted-foreground font-normal">
-                    Masukkan informasi buku secara manual
-                  </div>
-                </div>
-              </div>
-            </Button>
-          </div>
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setAddMethodDialogOpen(false)
-                setManualInputMode(false)
-                setIsbnSearchMode(false)
-                setSearchedBookData(null)
-                setEditableBookData(null)
-                setIsbnInput("")
-                setIsbnSearchError("")
-                setManualFormData({
-                  title: "",
-                  author: "",
-                  isbn: "",
-                  description: "",
-                  coverImage: "",
-                })
-              }}
-            >
-              Batal
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Form Tambah Buku */}
-      <Dialog open={(!addMethodDialogOpen && (manualInputMode || isbnSearchMode || editableBookData))} onOpenChange={(open) => {
-        if (!open) {
-          setManualInputMode(false)
-          setIsbnSearchMode(false)
-          setSearchedBookData(null)
-          setEditableBookData(null)
-          setIsbnInput("")
-          setIsbnSearchError("")
-          setManualFormData({
-            title: "",
-            author: "",
-            isbn: "",
-            description: "",
-            coverImage: "",
-          })
-          // If closing from form, also reset addMethodDialogOpen to allow reopening
-          if (!manualInputMode && !isbnSearchMode && !editableBookData) {
-            setAddMethodDialogOpen(false)
-          }
-        }
-      }}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Buku Baru</DialogTitle>
-            <DialogDescription>
-              {manualInputMode 
-                ? "Masukkan informasi buku secara manual"
-                : isbnSearchMode
-                ? "Masukkan ISBN untuk mencari informasi buku secara otomatis"
-                : editableBookData
-                ? "Lengkapi informasi dan simpan buku"
-                : "Masukkan informasi buku"}
-            </DialogDescription>
-          </DialogHeader>
-
-          {isbnSearchMode && !editableBookData ? (
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              handleSearchByIsbn(isbnInput)
-            }} className="space-y-4">
-              <div>
-                <Label htmlFor="isbn-search">ISBN</Label>
-                <Input
-                  id="isbn-search"
-                  type="text"
-                  value={isbnInput}
-                  onChange={(e) => {
-                    setIsbnInput(e.target.value)
-                    setIsbnSearchError("")
-                  }}
-                  placeholder="Masukkan ISBN (10 atau 13 digit)"
-                  disabled={isbnSearchLoading}
-                  required
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Sistem akan mencari informasi buku dari Open Library dan Google Books
-                </p>
-              </div>
-              {isbnSearchError && (
-                <div className="text-sm text-destructive bg-destructive/10 p-3 rounded">
-                  {isbnSearchError}
-                </div>
-              )}
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsbnSearchMode(false)
-                    setAddMethodDialogOpen(true)
-                    setIsbnInput("")
-                    setIsbnSearchError("")
-                  }}
-                  disabled={isbnSearchLoading}
-                >
-                  Kembali
-                </Button>
-                <Button type="submit" disabled={isbnSearchLoading || !isbnInput.trim()}>
-                  {isbnSearchLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Mencari...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="mr-2 h-4 w-4" />
-                      Cari Buku
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          ) : manualInputMode ? (
-            <form onSubmit={handleSubmitBook}>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="manual-title">
-                    Judul Buku <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="manual-title"
-                    value={manualFormData.title}
-                    onChange={(e) =>
-                      setManualFormData({ ...manualFormData, title: e.target.value })
-                    }
-                    placeholder="Masukkan judul buku"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manual-author">
-                    Penulis <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="manual-author"
-                    value={manualFormData.author}
-                    onChange={(e) =>
-                      setManualFormData({ ...manualFormData, author: e.target.value })
-                    }
-                    placeholder="Masukkan nama penulis"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manual-isbn">ISBN</Label>
-                  <Input
-                    id="manual-isbn"
-                    value={manualFormData.isbn}
-                    onChange={(e) =>
-                      setManualFormData({ ...manualFormData, isbn: e.target.value })
-                    }
-                    placeholder="Masukkan ISBN (opsional)"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manual-description">Deskripsi</Label>
-                  <Textarea
-                    id="manual-description"
-                    value={manualFormData.description}
-                    onChange={(e) =>
-                      setManualFormData({ ...manualFormData, description: e.target.value })
-                    }
-                    placeholder="Masukkan deskripsi buku (opsional)"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manual-coverImage">URL Cover Buku</Label>
-                  <Input
-                    id="manual-coverImage"
-                    type="url"
-                    value={manualFormData.coverImage}
-                    onChange={(e) =>
-                      setManualFormData({ ...manualFormData, coverImage: e.target.value })
-                    }
-                    placeholder="https://example.com/cover.jpg (opsional)"
-                  />
-                </div>
-                {manualFormData.coverImage && (
-                  <div className="flex justify-center">
-                    <img
-                      src={manualFormData.coverImage}
-                      alt="Preview"
-                      className="h-32 object-cover rounded"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <DialogFooter className="mt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setManualInputMode(false)
-                    setAddMethodDialogOpen(true)
-                    setManualFormData({
-                      title: "",
-                      author: "",
-                      isbn: "",
-                      description: "",
-                      coverImage: "",
-                    })
-                  }}
-                  disabled={isbnSearchLoading}
-                >
-                  Kembali
-                </Button>
-                <Button type="submit" disabled={isbnSearchLoading}>
-                  {isbnSearchLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          ) : editableBookData ? (
-            <form onSubmit={handleSubmitBook}>
-              <div className="space-y-4">
-                {editableBookData.coverImage && (
-                  <div className="flex justify-center">
-                    <img
-                      src={editableBookData.coverImage}
-                      alt={editableBookData.title}
-                      className="h-32 object-cover rounded"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
-                <div>
-                  <Label htmlFor="edit-title">
-                    Judul Buku <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="edit-title"
-                    value={editableBookData.title}
-                    onChange={(e) =>
-                      setEditableBookData({ ...editableBookData, title: e.target.value })
-                    }
-                    placeholder="Masukkan judul buku"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-author">
-                    Penulis <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="edit-author"
-                    value={editableBookData.author}
-                    onChange={(e) =>
-                      setEditableBookData({ ...editableBookData, author: e.target.value })
-                    }
-                    placeholder="Masukkan nama penulis"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-isbn">ISBN</Label>
-                  <Input
-                    id="edit-isbn"
-                    value={editableBookData.isbn}
-                    onChange={(e) =>
-                      setEditableBookData({ ...editableBookData, isbn: e.target.value })
-                    }
-                    placeholder="Masukkan ISBN (opsional)"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-description">Deskripsi</Label>
-                  <Textarea
-                    id="edit-description"
-                    value={editableBookData.description || ""}
-                    onChange={(e) =>
-                      setEditableBookData({ ...editableBookData, description: e.target.value })
-                    }
-                    placeholder="Masukkan deskripsi buku (opsional)"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-coverImage">URL Cover Buku</Label>
-                  <Input
-                    id="edit-coverImage"
-                    type="url"
-                    value={editableBookData.coverImage || ""}
-                    onChange={(e) =>
-                      setEditableBookData({ ...editableBookData, coverImage: e.target.value })
-                    }
-                    placeholder="https://example.com/cover.jpg (opsional)"
-                  />
-                  {editableBookData.coverImage && (
-                    <div className="mt-2 flex justify-center">
-                      <img
-                        src={editableBookData.coverImage}
-                        alt="Preview"
-                        className="h-24 object-cover rounded border"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <DialogFooter className="mt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setEditableBookData(null)
-                    setSearchedBookData(null)
-                    setIsbnInput("")
-                    setIsbnSearchMode(true)
-                    setIsbnSearchError("")
-                  }}
-                  disabled={isbnSearchLoading}
-                >
-                  Cari Lagi
-                </Button>
-                <Button type="submit" disabled={isbnSearchLoading}>
-                  {isbnSearchLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <AddBookForm
+        open={addBookOpen}
+        onOpenChange={setAddBookOpen}
+        userId={userId}
+        onSuccess={() => {
+          setAddBookOpen(false)
+          fetchBooks()
+        }}
+      />
 
       <BookForm
         open={formOpen}
         onOpenChange={setFormOpen}
         book={selectedBook}
         onSuccess={fetchBooks}
-      />
-
-      {/* ISBN Scanner Dialog */}
-      <ISBNScanner
-        open={scannerOpen}
-        onScan={handleScannerScan}
-        onClose={() => {
-          setScannerOpen(false)
-          setAddMethodDialogOpen(true)
-        }}
       />
     </div>
   )

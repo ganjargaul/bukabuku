@@ -13,7 +13,7 @@ const CustomLink = React.forwardRef<HTMLAnchorElement, LinkProps>(
       <Link
         href={href}
         className={cn(
-          "text-primary underline-offset-4 hover:underline",
+          "text-primary underline",
           className
         )}
         ref={ref}

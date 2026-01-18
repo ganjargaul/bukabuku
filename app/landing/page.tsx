@@ -105,18 +105,18 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/10 to-background py-20">
+      <section className="bg-muted py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-primary" />
+              <div className="h-16 w-16 rounded-full bg-muted border border-border flex items-center justify-center">
+                <BookOpen className="h-8 w-8 text-foreground" />
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
               Perpustakaan Komunitas
               <br />
-              <span className="text-primary">Terdesentralisasi</span>
+              <span className="text-foreground">Terdesentralisasi</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
               Pinjam dan pinjamkan buku dengan komunitas. Bangun perpustakaan
@@ -155,7 +155,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
-                <Library className="h-10 w-10 text-primary mb-4" />
+                <Library className="h-10 w-10 text-foreground mb-4" />
                 <CardTitle>Koleksi Lengkap</CardTitle>
                 <CardDescription>
                   Akses ribuan buku dari koleksi admin dan komunitas
@@ -164,7 +164,7 @@ export default function LandingPage() {
             </Card>
             <Card>
               <CardHeader>
-                <Users className="h-10 w-10 text-primary mb-4" />
+                <Users className="h-10 w-10 text-foreground mb-4" />
                 <CardTitle>Pinjam Antar User</CardTitle>
                 <CardDescription>
                   Pinjam buku langsung dari koleksi user lain di komunitas
@@ -173,7 +173,7 @@ export default function LandingPage() {
             </Card>
             <Card>
               <CardHeader>
-                <TrendingUp className="h-10 w-10 text-primary mb-4" />
+                <TrendingUp className="h-10 w-10 text-foreground mb-4" />
                 <CardTitle>Tracking Real-time</CardTitle>
                 <CardDescription>
                   Pantau status peminjaman, due dates, dan denda secara real-time
@@ -213,7 +213,7 @@ export default function LandingPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredBooks.map((book) => (
-                  <Card key={book.id} className="flex flex-col hover:shadow-lg transition-shadow">
+                  <Card key={book.id} className="flex flex-col">
                     <div className="relative w-full h-48 bg-muted">
                       {book.coverImage ? (
                         <img
@@ -254,7 +254,7 @@ export default function LandingPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredUserBooks.map((userBook) => (
-                  <Card key={userBook.id} className="flex flex-col hover:shadow-lg transition-shadow">
+                  <Card key={userBook.id} className="flex flex-col">
                     <div className="relative w-full h-48 bg-muted">
                       {userBook.book.coverImage ? (
                         <img
@@ -320,7 +320,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/10">
+      <section className="py-16 bg-muted">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Bergabung dengan Komunitas

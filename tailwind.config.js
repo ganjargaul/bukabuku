@@ -55,8 +55,9 @@ module.exports = {
         sm: "0",
       },
       fontFamily: {
-        sans: ['Inclusive Sans'],
-        serif: ['Inclusive Sans'],
+        sans: ['Inclusive Sans', 'sans-serif'],
+        serif: ['Inclusive Sans', 'sans-serif'],
+        mono: ['Inclusive Sans', 'monospace'],
       },
       keyframes: {
         "accordion-down": {

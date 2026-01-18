@@ -180,14 +180,14 @@ export default function BorrowsPage() {
     return (
       <Card
         key={borrow.id}
-        className={`transition-colors hover:bg-black/5 ${
+        className={`transition-colors hover:bg-muted/50 ${
           isOverdue || isDueSoon
-            ? "bg-black/5"
+            ? "bg-muted/30"
             : ""
         }`}
       >
         {isDueSoon && (
-          <div className="px-6 py-2 bg-black/5">
+          <div className="px-6 py-2 bg-muted/30">
             <p className="text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <strong>Peringatan:</strong> Buku ini akan jatuh tempo
@@ -196,7 +196,7 @@ export default function BorrowsPage() {
           </div>
         )}
         {isOverdue && (
-          <div className="px-6 py-2 bg-black/10">
+          <div className="px-6 py-2 bg-muted/50">
             <p className="text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <strong>Terlambat!</strong> Buku ini sudah melewati

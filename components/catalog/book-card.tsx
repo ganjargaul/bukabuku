@@ -28,7 +28,7 @@ export function BookCard({
   return (
     <Card className="flex flex-col h-full overflow-hidden">
       {/* Bagian Gambar */}
-      <div className="relative aspect-[3/4] bg-gray-100 border-b border-black overflow-hidden">
+      <div className="relative aspect-[3/4] bg-muted border-b border-black overflow-hidden">
         {coverImage ? (
           <img
             src={coverImage}
@@ -56,7 +56,7 @@ export function BookCard({
           <h3 className="font-serif text-xl font-bold uppercase tracking-tight line-clamp-2">
             {title}
           </h3>
-          <p className="text-sm italic text-gray-700 font-serif">{author}</p>
+          <p className="text-sm italic text-muted-foreground font-serif">{author}</p>
         </div>
 
         {/* Garis pemisah tipis horizontal */}

@@ -361,7 +361,7 @@ export default function CatalogPage() {
                 }}
               >
                 {/* Bagian Gambar */}
-                <div className="relative aspect-[3/4] bg-gray-100 border-b border-black overflow-hidden">
+                <div className="relative aspect-[3/4] bg-muted border-b border-border overflow-hidden">
                   {item.coverImage ? (
                     <img
                       src={item.coverImage}
@@ -377,7 +377,7 @@ export default function CatalogPage() {
                     </div>
                   )}
                   {item.available === 0 && item.unavailable > 0 && (
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-foreground/20 flex items-center justify-center">
                       <span className="text-sm font-serif text-white uppercase tracking-widest">Sedang Dipinjam</span>
                     </div>
                   )}
@@ -393,7 +393,7 @@ export default function CatalogPage() {
                   </div>
 
                   {/* Garis pemisah tipis horizontal */}
-                  <div className="border-t border-black/20 pt-3 flex justify-between text-[10px] uppercase tracking-widest font-serif">
+                  <div className="border-t border-border/50 pt-3 flex justify-between text-[10px] uppercase tracking-widest font-serif">
                     {item.isbn && <span>ISBN: {item.isbn}</span>}
                     <span className={item.available > 0 ? "font-bold" : "text-muted-foreground"}>
                       {item.available > 0 ? "Tersedia" : item.unavailable > 0 ? "Dipinjam" : "Tidak Tersedia"}
@@ -418,41 +418,175 @@ export default function CatalogPage() {
 
       {/* Book Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-4">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-4 p-0">
           {selectedBook && (
             <>
-              <DialogHeader className="pb-4 border-b border-black">
-                <DialogTitle className="text-2xl font-serif">{selectedBook.title}</DialogTitle>
-                <DialogDescription className="text-base font-serif">
-                  {selectedBook.author}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-4 pt-4">
-                {/* Cover Image */}
-                <div className="md:col-span-1">
-                  <div className="relative w-full max-w-[200px] mx-auto md:max-w-none aspect-[2/3] bg-[#fdfdfd] overflow-hidden">
-                    {selectedBook.coverImage ? (
-                      <img
-                        src={selectedBook.coverImage}
-                        alt={selectedBook.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <BookOpen className="h-24 w-24 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
+              {/* Mobile Layout - Full Width Card Style */}
+              <div className="md:hidden">
+                {/* Cover Image Section */}
+                <div className="relative w-full aspect-[3/4] bg-muted overflow-hidden">
+                  {selectedBook.coverImage ? (
+                    <img
+                      src={selectedBook.coverImage}
+                      alt={selectedBook.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <BookOpen className="h-24 w-24 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
 
-                {/* Book Details */}
-                <div className="md:col-span-2 space-y-0">
-                  {/* Header Section */}
-                  <div className="space-y-3 pb-4 border-b border-black">
+                {/* Book Details Section - Greyscale Background */}
+                <div className="bg-background p-4 sm:p-6 space-y-4 border-t border-border">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-serif font-bold uppercase tracking-tight mb-1">
+                      {selectedBook.title}
+                    </h2>
+                    <p className="text-sm sm:text-base italic text-muted-foreground font-serif">
+                      {selectedBook.author}
+                    </p>
+                  </div>
+
+                  {selectedBook.isbn && (
+                    <div className="flex items-center gap-2 text-xs sm:text-sm">
+                      <span className="font-serif font-semibold">ISBN:</span>
+                      <span className="font-serif">{selectedBook.isbn}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-serif font-semibold">Tersedia:</span>
+                      <span className="text-xs sm:text-sm font-serif font-bold">{selectedBook.available}</span>
+                    </div>
+                    {selectedBook.unavailable > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm font-serif font-semibold">Dipinjam:</span>
+                        <span className="text-xs sm:text-sm font-serif font-bold">{selectedBook.unavailable}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-serif font-semibold">Total:</span>
+                      <span className="text-xs sm:text-sm font-serif font-bold">{selectedBook.total}</span>
+                    </div>
+                  </div>
+
+                  {/* Borrow Button */}
+                  <div className="pt-2">
+                    <BorrowButton
+                      bookId={selectedBook.id}
+                      bookTitle={selectedBook.title}
+                      available={selectedBook.available}
+                      unavailable={selectedBook.unavailable}
+                      locations={selectedBook.locations}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  {selectedBook.description && (
+                    <div className="pt-4 border-t border-border">
+                      <h3 className="text-sm font-serif font-semibold mb-2">Deskripsi</h3>
+                      <p className="text-xs sm:text-sm leading-relaxed font-serif text-muted-foreground">
+                        {selectedBook.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Locations */}
+                  {selectedBook.locations && selectedBook.locations.length > 0 && (
+                    <div className="pt-4 border-t border-border">
+                      <h3 className="text-sm font-serif font-semibold mb-3">Lokasi & Ketersediaan</h3>
+                      <div className="space-y-4">
+                        {selectedBook.locations.map((loc, locIdx) => (
+                          <div key={locIdx} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-xs sm:text-sm font-serif font-semibold">{loc.location}</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="font-serif">
+                                  <span className="font-bold">{loc.count}</span> copy
+                                </span>
+                                {loc.unavailableCount > 0 && (
+                                  <span className="font-serif text-muted-foreground">
+                                    <span className="font-bold">{loc.unavailableCount}</span> dipinjam
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs font-serif font-semibold">Pemilik Buku:</p>
+                              <div className="space-y-1">
+                                {loc.owners.map((owner, ownerIdx) => (
+                                  <div 
+                                    key={ownerIdx} 
+                                    className="flex items-center justify-between text-xs"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-3 w-3 text-muted-foreground" />
+                                      <Link 
+                                        href={`/users/${owner.id}/books`}
+                                        className="font-serif hover:underline"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {owner.name}
+                                      </Link>
+                                    </div>
+                                    <span className={`text-xs font-serif ${owner.isAvailable ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+                                      {owner.isAvailable ? 'Tersedia' : 'Dipinjam'}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:block">
+                <DialogHeader className="pb-4 border-b border-border">
+                  <DialogTitle className="text-2xl font-serif">{selectedBook.title}</DialogTitle>
+                  <DialogDescription className="text-base font-serif">
+                    {selectedBook.author}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-4 pt-4">
+                  {/* Cover Image */}
+                  <div className="md:col-span-1">
+                    <div className="relative w-full max-w-[200px] mx-auto md:max-w-none aspect-[2/3] bg-background overflow-hidden">
+                      {selectedBook.coverImage ? (
+                        <img
+                          src={selectedBook.coverImage}
+                          alt={selectedBook.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <BookOpen className="h-24 w-24 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Book Details */}
+                  <div className="md:col-span-2 space-y-0">
+                    {/* Header Section */}
+                    <div className="space-y-3 pb-4 border-b border-border">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="font-serif font-semibold">Penulis:</span>
@@ -484,7 +618,7 @@ export default function CatalogPage() {
 
                   {/* Description Section */}
                   {selectedBook.description && (
-                    <div className="pt-4 pb-4 border-b border-black">
+                    <div className="pt-4 pb-4 border-b border-border">
                       <h3 className="text-sm font-serif font-semibold mb-3">Deskripsi</h3>
                       <p className="text-sm leading-relaxed font-serif">
                         {selectedBook.description}
@@ -535,7 +669,7 @@ export default function CatalogPage() {
                                         {owner.name}
                                       </Link>
                                     </div>
-                                    <span className={`text-xs font-serif ${owner.isAvailable ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                    <span className={`text-xs font-serif ${owner.isAvailable ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                                       {owner.isAvailable ? 'Tersedia' : 'Dipinjam'}
                                     </span>
                                   </div>
@@ -557,6 +691,7 @@ export default function CatalogPage() {
                       unavailable={selectedBook.unavailable}
                       locations={selectedBook.locations}
                     />
+                  </div>
                   </div>
                 </div>
               </div>

@@ -173,7 +173,7 @@ export function BorrowButton({
     <>
       <Button 
         onClick={() => setOpen(true)} 
-        className="w-full"
+        className="w-full border-0 !border-0"
         variant={isWaitingList ? "secondary" : "default"}
       >
         {isWaitingList ? (

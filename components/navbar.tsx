@@ -120,9 +120,9 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b border-black bg-[#fdfdfd]">
+    <nav className="border-b border-border bg-background shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between border-b border-black">
+        <div className="flex h-16 items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <Link href={isLoggedIn ? "/catalog" : "/landing"} className="text-lg sm:text-xl font-bold">
