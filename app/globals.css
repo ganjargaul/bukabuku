@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+@layer base {
+  :root {
+    --background: 253 253 253;
+    --foreground: 0 0 0;
+    --card: 253 253 253;
+    --card-foreground: 0 0 0;
+    --popover: 253 253 253;
+    --popover-foreground: 0 0 0;
+    --primary: 0 0 0;
+    --primary-foreground: 253 253 253;
+    --secondary: 0 0 0;
+    --secondary-foreground: 253 253 253;
+    --muted: 250 250 250;
+    --muted-foreground: 0 0 0;
+    --accent: 0 0 0;
+    --accent-foreground: 253 253 253;
+    --destructive: 0 0 0;
+    --destructive-foreground: 253 253 253;
+    --border: 0 0 0;
+    --input: 0 0 0;
+    --ring: 0 0 0;
+    --radius: 0;
+  }
+
+  * {
+    @apply border-border/0;
+  }
+
+  * {
+    font-family: 'Inclusive Sans', sans-serif;
+  }
+
+  html, body {
+    font-family: 'Inclusive Sans', sans-serif;
+  }
+
+  body {
+    @apply bg-[#fdfdfd] text-black;
+  }
+}
+
+@layer components {
+  [role="dialog"] span.font-serif.font-semibold {
+    height: 24px;
+    font-size: 14px;
+  }
+
+  [role="dialog"] span.font-serif.font-bold {
+    font-size: 14px;
+  }
+}
